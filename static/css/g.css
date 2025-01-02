@@ -292,9 +292,9 @@ a.icp {
 	position: absolute;
 	bottom: 0;
 	right: 0;
-	opacity: 0.5;
-	z-index: 1;
-	max-height: 20rem;
+	opacity: 0.35;
+	z-index: -1;
+	max-height: 400rem;
 	bottom: var(--theme-header-offset-y, 0);
 	right: var(--theme-header-offset-x, 0);
 	-ms-user-select: none;
