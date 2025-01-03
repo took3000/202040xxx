@@ -292,7 +292,7 @@ a.icp {
 	position: absolute;
 	bottom: 0;
 	right: 0;
-	opacity: 0.36;
+	opacity: 0.35;
 	z-index: -1;
 	max-height: 400rem;
 	bottom: var(--theme-header-offset-y, 0);
@@ -497,7 +497,9 @@ footer p {
     pointer-events: auto;transition: all 1.2s ease-out;
     font-size: 11px;}    
 
-.link_itesst{color:#6c7a89;transition: all .2s ease-out;}
+.link_itesst{color:#6c7a89;transition: all .2s ease-out;
+    overflow: hidden;
+    height: 12px;text-overflow: ellipsis;}
 .link_itess:hover .link_itessa{color:#212121;}
 .link_itess:hover .link_itesst{color:#6c7a89;}
 
