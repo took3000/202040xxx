@@ -28,8 +28,8 @@
             width: 100%;
             height: 100%;
             z-index: 9999;
-            backdrop-filter: blur(2.0rem);
-            -webkit-backdrop-filter: blur(2.0rem);
+            backdrop-filter: blur(1.0rem);
+            -webkit-backdrop-filter: blur(1.0rem);
             background: rgba(255, 255, 255, 0.6);
             display: flex;
             justify-content: center;
@@ -48,7 +48,7 @@
         }
 
         .tip-text {
-            font-size: 1.8rem;
+            font-size: 1.2rem;
             margin-bottom: 2rem;
             color: #333;
         }
@@ -60,7 +60,7 @@
             padding: 1.2rem 1.8rem;
              margin: 0rem 1rem;
             border-radius: 3rem;
-            font-size: 1.4rem;
+            font-size: 1.0rem;
             cursor: pointer;
             transition: all 0.3s ease;
             min-width: 8rem;
@@ -999,7 +999,7 @@ function showMsg() {
                 btn.textContent = '✓ 复制成功';
                 btn.classList.add('copied');
                 setTimeout(() => {
-                    btn.textContent = '浏览链接';
+                    btn.textContent = '你已复制';
                     btn.classList.remove('copied', 'copying');
                 }, 2000);
             };
