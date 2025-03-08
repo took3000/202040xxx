@@ -973,31 +973,19 @@ function showMsg() {
       <script>
       // 修改后的微信提示层逻辑
     document.addEventListener('DOMContentLoaded', () => {
-        const isWechat = /MicroMessenger/i.test(navigator.userAgent);
-        if (isWechat || true) { // 这里始终显示提示层用于演示
-            const tip = document.createElement('div');
-            const pdfUrl = getCorrectPdfUrl(); // 获取修正后的PDF链接
-            
-            tip.innerHTML = `
-                <div class="wechat-overlay ${!isWechat ? 'default-overlay' : ''}">
-                    <div class="tip-card ${!isWechat ? 'bottom-card' : ''}">
-                        ${isWechat ? '<div class="tip-text">由于微信嗯你懂的所以<br>请复制所需链接到浏览器打开</div>' : ''}
-                        
-                        <!-- 微信环境保持原按钮 -->
-                        ${isWechat ? `
-                           
-                            <button class="copy-btn" onclick="copyUrl(this)">复制链接</button>
-                        ` : `
-                            <!-- 非微信环境修改按钮 -->
-
-                        
-                            <button class="copy-btn" onclick="copyUrl(this)">私发好友</button>
-                        `}
-                    </div>
-                </div>`;
-            document.body.prepend(tip);
-        }
-    });
+    const isWechat = /MicroMessenger/i.test(navigator.userAgent);
+    if (isWechat) {
+        const tip = document.createElement('div');
+        tip.innerHTML = `
+            <div class="wechat-overlay">
+                <div class="tip-card">
+                    <div class="tip-text">由于微信限制<br>请复制链接到浏览器打开</div>
+                    <button class="copy-btn" onclick="copyUrl(this)">复制链接</button>
+                </div>
+            </div>`;
+        document.body.prepend(tip);
+    }
+});
 
 // 复制功能
         function copyUrl(btn) {
