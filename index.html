@@ -1146,22 +1146,35 @@ function copyPdfUrl(btn) {
 </style>
 
 
-<script>
+
+
+	    <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const CACHE_TIME = 0.5 * 60 * 60 * 1000; // 2小时缓存
-    const BATCH_SIZE = 9;  // 每批检测3个
-    const RETRY_COUNT = 2;  // 失败重试次数
+    const CACHE_TIME = 2 * 60 * 60 * 1000; // 2小时缓存
+    const BATCH_SIZE = 3; 
+    const RETRY_COUNT = 2;
     
-    // 初始化状态点
+    // 初始化状态点（增强版）
     document.querySelectorAll('.link_itess, .link_itessc').forEach(link => {
-        if (!link.querySelector('.status-dot')) {
-            const dot = document.createElement('span');
-            dot.className = 'status-dot checking';
-            link.insertAdjacentElement('afterbegin', dot);
+        const dot = document.createElement('span');
+        dot.className = 'status-dot';
+        
+        // 立即读取缓存状态
+        const url = new URL(link.href).href;
+        const cached = JSON.parse(localStorage.getItem(`lc_${url}`));
+        
+        if (cached) {
+            const status = cached.status ? 'online' : 'offline';
+            dot.classList.add(status);
+            link.style.opacity = cached.status ? 1 : 0.85;
+        } else {
+            dot.classList.add('checking');
         }
+        
+        link.insertAdjacentElement('afterbegin', dot);
     });
 
-    // 智能检测器核心
+    // 智能检测器（优化版）
     class LinkChecker {
         constructor() {
             this.links = Array.from(document.querySelectorAll('.link_itess, .link_itessc'));
@@ -1172,6 +1185,7 @@ document.addEventListener("DOMContentLoaded", function() {
         start() {
             if (!this.isNetworkStable()) {
                 this.markAllOffline();
+                setTimeout(() => this.start(), 5000); // 5秒后重试
                 return;
             }
             this.processBatch();
@@ -1188,22 +1202,27 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         async checkLink(link) {
-            const url = new URL(link.href).origin;
+            const url = new URL(link.href).href;
             const cached = this.getCachedStatus(url);
             
-            if (cached?.status) {
-                this.updateStatus(link, cached.status);
-                if (Date.now() - cached.timestamp < CACHE_TIME) return;
+            // 使用有效缓存
+            if (cached && Date.now() - cached.timestamp < CACHE_TIME) {
+                this.updateStatus(link, cached.status ? 'online' : 'offline');
+                return;
             }
 
+            // 开始检测
+            let finalStatus = 'offline';
             for (let i = 0; i <= RETRY_COUNT; i++) {
                 const isAlive = await this.multiCheck(url);
                 if (isAlive !== null) {
-                    this.updateStatus(link, isAlive ? 'online' : 'offline');
-                    this.cacheStatus(url, isAlive);
+                    finalStatus = isAlive ? 'online' : 'offline';
                     break;
                 }
             }
+            
+            this.updateStatus(link, finalStatus);
+            this.cacheStatus(url, finalStatus === 'online');
         }
 
         async multiCheck(url) {
@@ -1212,7 +1231,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     this.checkResources(url),
                     this.checkHeadRequest(url)
                 ]);
-            } catch {
+            } catch (e) {
                 return null;
             }
         }
@@ -1222,12 +1241,11 @@ document.addEventListener("DOMContentLoaded", function() {
             const checks = resources.map(path => {
                 return new Promise(resolve => {
                     const img = new Image();
+                    img.src = `${url}${path}?ts=${Date.now()}`;
                     img.onload = () => resolve(true);
                     img.onerror = () => resolve(false);
-                    img.src = `${url}${path}?ts=${Date.now()}`;
                 });
             });
-            
             const results = await Promise.all(checks);
             return results.some(Boolean);
         }
@@ -1235,8 +1253,9 @@ document.addEventListener("DOMContentLoaded", function() {
         async checkHeadRequest(url) {
             try {
                 const res = await fetch(url, { 
-                    method: 'HEAD', 
+                    method: 'HEAD',
                     mode: 'no-cors',
+                    cache: 'no-store',
                     referrerPolicy: 'no-referrer'
                 });
                 return res.ok || res.type === 'opaque';
@@ -1245,7 +1264,6 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
 
-        // 状态管理
         updateStatus(link, status) {
             const dot = link.querySelector('.status-dot');
             if (!dot) return;
@@ -1253,31 +1271,35 @@ document.addEventListener("DOMContentLoaded", function() {
             dot.classList.remove('checking', 'online', 'offline');
             dot.classList.add(status);
             
-            // 增强可视化反馈
             link.style.opacity = status === 'online' ? 1 : 0.85;
-            link.style.transition = 'opacity 0.3s ease';
+            if (status === 'checking') {
+                link.style.opacity = 0.9; // 检测中的中间状态
+            }
         }
 
-        // 缓存系统
         getCachedStatus(url) {
             const data = localStorage.getItem(`lc_${url}`);
             return data ? JSON.parse(data) : null;
         }
 
         cacheStatus(url, isAlive) {
-            localStorage.setItem(`lc_${url}`, JSON.stringify({
-                status: isAlive,
-                timestamp: Date.now()
-            }));
+            try {
+                localStorage.setItem(`lc_${url}`, JSON.stringify({
+                    status: isAlive,
+                    timestamp: Date.now()
+                }));
+            } catch (e) {
+                // 本地存储已满时自动清理
+                const keys = Object.keys(localStorage).filter(k => k.startsWith('lc_'));
+                keys.slice(0, 10).forEach(k => localStorage.removeItem(k));
+                this.cacheStatus(url, isAlive); // 重试
+            }
         }
 
-        // 网络状态检测
         isNetworkStable() {
+            if (!navigator.onLine) return false;
             const connection = navigator.connection || navigator.mozConnection;
-            const types = ['4g', '5g', 'wifi'];
-            
-            return navigator.onLine && 
-                  (!connection || types.includes(connection.effectiveType));
+            return !connection || ['4g', '5g', 'wifi'].includes(connection.effectiveType);
         }
 
         markAllOffline() {
@@ -1296,8 +1318,6 @@ document.addEventListener("DOMContentLoaded", function() {
     window.addEventListener('offline', () => checker.markAllOffline());
 });
 </script>
-	    
-
 	    
     </body>
 </html>
