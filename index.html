@@ -215,14 +215,19 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-  const links = document.querySelectorAll("a.link_itessc");
-  links.forEach(link => {
-    const statusDot = document.createElement("span");
-    statusDot.className = "status-dot";
-    statusDot.id = `status${link.id.replace('link', '')}`;
-    link.appendChild(statusDot);
-    checkLink(link.href);
-  });
+    const links = Array.from(document.querySelectorAll('.link_itess, .link_itessc'));
+    
+    links.forEach(link => {
+        const dot = link.querySelector('.status-dot');
+        dot.classList.add('checking');
+        
+        advancedCheck(link).then(status => {
+            dot.classList.remove('checking');
+            dot.classList.add(status);
+            if (status === 'online') {
+                link.style.opacity = 1; // 高亮可用链接
+            }
+        });
 
   function checkLink(url) {
     fetch(url)
