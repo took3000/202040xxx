@@ -1123,9 +1123,9 @@ function copyPdfUrl(btn) {
     animation: constant-breath 2s infinite; /* 继承基础呼吸 */
 }
 
-.link_itess {
-    position: relative !important;
-    padding-top: 8px !important;
+.link_itess, .link_itessc {
+  position: relative !important;
+  padding-top: 8px !important;
 }
 </style>
 
@@ -1137,7 +1137,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const BATCH_INTERVAL = 1000; // 批次间隔1秒
     
     // 创建状态指示器
-    document.querySelectorAll(".link_itess").forEach(link => {
+    document.querySelectorAll(".link_itess, .link_itessc").forEach(link => {
         const statusDot = document.createElement("span");
         statusDot.className = "status-dot checking";
         link.appendChild(statusDot);
