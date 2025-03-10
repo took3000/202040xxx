@@ -1076,12 +1076,11 @@ function copyPdfUrl(btn) {
 
 
 <style>
-/* 状态指示点核心样式 */
+/* 状态指示点最终版 */
 .link_itess,
 .link_itessc {
     position: relative !important;
     padding-top: 8px !important;
-    overflow: visible !important;
 }
 
 .status-dot {
@@ -1094,13 +1093,12 @@ function copyPdfUrl(btn) {
     top: 6px;
     right: 6px;
     z-index: 100;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
     animation: breath 2s infinite ease-in-out;
-    opacity: 0.8;
-    pointer-events: none;
+    opacity: 0.9;
 }
 
-/* 基础呼吸动画 */
+/* 基础呼吸动画（仅用于检测中） */
 @keyframes breath {
     0%, 100% { transform: scale(0.9); opacity: 0.6; }
     50% { transform: scale(1.2); opacity: 1; }
@@ -1117,44 +1115,26 @@ function copyPdfUrl(btn) {
     50% { transform: scale(1.5); opacity: 0.9; }
 }
 
-/* 最终状态 */
+/* 在线状态 */
 .status-dot.online {
     background: #4CAF50;
-    animation: breath 2s infinite, glow-green 3s infinite;
+    animation: breath 2s infinite; /* 保持呼吸动画 */
 }
 
+/* 离线状态 */
 .status-dot.offline {
     background: #9E9E9E;
-    animation: breath 2s infinite;
-}
-
-/* 在线状态额外光晕 */
-@keyframes glow-green {
-    0%, 100% { box-shadow: 0 0 2px #4CAF5055; }
-    50% { box-shadow: 0 0 4px #4CAF5099; }
+    animation: none !important; /* 禁用所有动画 */
+    opacity: 0.8;
+    transform: scale(1); /* 重置缩放 */
 }
 
 /* 移动端适配 */
 @media (max-width: 768px) {
     .status-dot {
-        --dot-size: 2.5px;
+        --dot-size: 4px;
         top: 4px;
         right: 4px;
-    }
-    .link_itess,
-    .link_itessc {
-        padding-top: 6px !important;
-    }
-}
-
-/* 高对比度模式适配 */
-@media (prefers-contrast: more) {
-    .status-dot {
-        box-shadow: 0 0 1px #000;
-        --dot-size: 4px;
-    }
-    .status-dot.offline {
-        background: #666;
     }
 }
 </style>
