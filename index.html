@@ -1076,6 +1076,15 @@ function copyPdfUrl(btn) {
 /* 状态指示器动画优化 */
 .status-dot {
     /* 原有样式保持不变 */
+	 display: block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    box-shadow: 0 0 4px rgba(0,0,0,0.1);
+    animation: micro-pulse 1.5s infinite;
     animation: fade-pulse 2s infinite both;
 }
 
