@@ -1070,84 +1070,52 @@ function copyPdfUrl(btn) {
 
 
 
-
-
-	<style>
-/* 状态指示点完整样式 */
+<style>
+/* 确保卡片容器有定位上下文 */
 .link_itess {
-    position: relative !important;
-    padding-top: 6px !important;
+    position: relative !important; /* 必须设置 */
+    padding-top: 5px; /* 给状态点留出空间 */
+    overflow: visible !important; /* 防止裁剪 */
 }
 
+/* 状态点最终修正版 */
 .status-dot {
     display: block;
     width: 3px;
     height: 3px;
     border-radius: 50%;
     position: absolute;
-    top: 5px;
-    right: 5px;
-    box-shadow: 0 0 3px rgba(0,0,0,0.1);
-    animation: fade-pulse 2.5s infinite ease-in-out;
+    top: 6px;    /* 距顶部距离 */
+    right: 6px;  /* 距右侧距离 */
+    z-index: 10; /* 确保在顶层 */
     opacity: 0.8;
+    pointer-events: none; /* 防止点击阻挡 */
+    animation: fade-pulse 2s infinite;
+    box-shadow: 0 0 2px rgba(0,0,0,0.2);
 }
 
-/* 基础呼吸动画 */
+/* 关键帧动画 */
 @keyframes fade-pulse {
-    0% { opacity: 0.4; }
+    0% { opacity: 0.5; }
     50% { opacity: 1; }
-    100% { opacity: 0.4; }
+    100% { opacity: 0.5; }
 }
 
 /* 检测中状态 */
 .status-dot.checking {
     background: #FFD700;
-    animation: checking-pulse 1.5s infinite both;
+    animation: checking-pulse 1.5s infinite;
 }
 
 @keyframes checking-pulse {
-    0% { 
-        transform: scale(0.8);
-        opacity: 0.3;
-    }
-    50% {
-        transform: scale(1.5);
-        opacity: 0.9;
-    }
-    100% {
-        transform: scale(0.8);
-        opacity: 0.3;
-    }
+    0% { transform: scale(0.8); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(0.8); }
 }
 
-/* 在线状态 */
-.status-dot.online {
-    background: #4CAF50;
-    animation: gentle-glow 3s infinite alternate;
-}
-
-/* 离线状态 */
-.status-dot.offline {
-    background: #9E9E9E;
-    animation: gentle-glow 3s infinite alternate;
-}
-
-/* 柔和渐变 */
-@keyframes gentle-glow {
-    0% { opacity: 0.6; }
-    50% { opacity: 0.9; }
-    100% { opacity: 0.6; }
-}
-
-/* 移动端微调 */
-@media (max-width: 768px) {
-    .status-dot {
-        top: 3px;
-        right: 3px;
-        width: 2.5px;
-        height: 2.5px;
-    }
-}
+/* 最终状态 */
+.status-dot.online { background: #4CAF50; }
+.status-dot.offline { background: #9E9E9E; }
 </style>
 
 	    
