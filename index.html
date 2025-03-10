@@ -1073,39 +1073,43 @@ function copyPdfUrl(btn) {
 
 
 	<style>
-/* 修改状态指示器样式 */
+/* 状态指示器动画优化 */
 .status-dot {
-    display: block;
-    width: 3px;
-    height: 3px;
-    border-radius: 50%;
-    position: absolute;
-    top: 3px;
-    right: 3px;
-    box-shadow: 0 0 4px rgba(0,0,0,0.1);
-    animation: micro-pulse 1.5s infinite;
+    /* 原有样式保持不变 */
+    animation: fade-pulse 2s infinite both;
 }
 
-/* 微调动画 */
-@keyframes micro-pulse {
-    0% { transform: scale(0.9); opacity: 0.8; }
-    50% { transform: scale(1.3); opacity: 1; }
-    100% { transform: scale(0.9); opacity: 0.8; }
+@keyframes fade-pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
 }
 
-/* 添加卡片定位上下文 */
-.link_itess {
-    position: relative !important;
-    padding-top: 6px !important; /* 防止遮挡文字 */
+/* 检测中状态使用更急促的动画 */
+.status-dot.checking {
+    animation: checking-pulse 1.2s infinite ease-in-out;
 }
 
-/* 状态颜色保持原有 */
-.status-dot.checking { background: #FFD700; }
-.status-dot.online { background: #4CAF50; animation: none; }
-.status-dot.offline { background: #9E9E9E; animation: none; }
+@keyframes checking-pulse {
+    0% { opacity: 0.4; transform: scale(0.9); }
+    50% { opacity: 1; transform: scale(1.2); }
+    100% { opacity: 0.4; transform: scale(0.9); }
+}
+
+/* 在线/离线状态使用柔和的渐隐 */
+.status-dot.online,
+.status-dot.offline {
+    animation: gentle-fade 3s infinite;
+}
+
+@keyframes gentle-fade {
+    0% { opacity: 0.8; }
+    50% { opacity: 0.4; }
+    100% { opacity: 0.8; }
+}
 </style>
 
-<script>
+	    
 // 状态检测优化版 (插入到</body>前)
 document.addEventListener("DOMContentLoaded", function() {
     const CACHE_EXPIRE = 24 * 60 * 60 * 1000; // 缓存24小时
