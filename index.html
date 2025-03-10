@@ -1145,140 +1145,154 @@ function copyPdfUrl(btn) {
 </style>
 
 
-
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const CACHE_EXPIRE = 2 * 60 * 60 * 1000; // 缓存6小时
-    const BATCH_SIZE = 3; // 每批检测3个
-    const BATCH_INTERVAL = 1000; // 批次间隔1.5秒
+    const CACHE_TIME = 2 * 60 * 60 * 1000; // 2小时缓存
+    const BATCH_SIZE = 3;  // 每批检测3个
+    const RETRY_COUNT = 2;  // 失败重试次数
     
-    // 创建状态指示器
+    // 初始化状态点
     document.querySelectorAll('.link_itess, .link_itessc').forEach(link => {
         if (!link.querySelector('.status-dot')) {
-            const statusDot = document.createElement('span');
-            statusDot.className = 'status-dot checking';
-            link.appendChild(statusDot);
+            const dot = document.createElement('span');
+            dot.className = 'status-dot checking';
+            link.insertAdjacentElement('afterbegin', dot);
         }
     });
 
-    // 获取所有需要检测的链接
-    const allLinks = Array.from(document.querySelectorAll('.link_itess, .link_itessc'));
-
-    // 智能分批检测
-    function startDetection() {
-        let currentBatch = 0;
-        
-        const processBatch = () => {
-            const links = allLinks.slice(currentBatch, currentBatch + BATCH_SIZE);
-            links.forEach(link => {
-                const url = new URL(link.href).origin;
-                checkWithCache(link, url);
-            });
-            currentBatch += BATCH_SIZE;
-            
-            if (currentBatch < allLinks.length) {
-                setTimeout(processBatch, BATCH_INTERVAL);
-            }
-        };
-
-        if (navigator.onLine) {
-            processBatch();
-        } else {
-            updateAllStatus('offline');
+    // 智能检测器核心
+    class LinkChecker {
+        constructor() {
+            this.links = Array.from(document.querySelectorAll('.link_itess, .link_itessc'));
+            this.total = this.links.length;
+            this.currentIndex = 0;
         }
-    }
 
-    // 带缓存的检测
-    async function checkWithCache(link, url) {
-        const cacheKey = `status_${url}`;
-        const cached = localStorage.getItem(cacheKey);
-        
-        // 有效缓存处理
-        if (cached) {
-            const { status, timestamp } = JSON.parse(cached);
-            if (Date.now() - timestamp < CACHE_EXPIRE) {
-                updateStatus(link, status);
+        start() {
+            if (!this.isNetworkStable()) {
+                this.markAllOffline();
                 return;
             }
+            this.processBatch();
         }
 
-        // 实际检测
-        const isAlive = await checkLinkStatus(url);
-        updateStatus(link, isAlive);
-        
-        // 更新缓存
-        localStorage.setItem(cacheKey, JSON.stringify({
-            status: isAlive,
-            timestamp: Date.now()
-        }));
-    }
-
-    // 核心检测方法
-    function checkLinkStatus(url) {
-        return new Promise(resolve => {
-            if (!navigator.onLine) return resolve(false);
-
-            const img = new Image();
-            let timer;
+        async processBatch() {
+            const batch = this.links.slice(this.currentIndex, this.currentIndex + BATCH_SIZE);
+            await Promise.all(batch.map(link => this.checkLink(link)));
             
-            // 双保险检测
-            const sources = [
-                `${url}/favicon.ico?ts=${Date.now()}`,
-                `${url}/logo.png?ts=${Date.now()}`
-            ];
-
-            const cleanUp = () => {
-                clearTimeout(timer);
-                img.onload = img.onerror = null;
-            };
-
-            img.onload = () => {
-                cleanUp();
-                resolve(img.width > 0 || img.height > 0);
-            };
-
-            img.onerror = () => {
-                cleanUp();
-                resolve(false);
-            };
-
-            // 尝试多个常见图标路径
-            img.src = sources[0];
-            
-            timer = setTimeout(() => {
-                // 第一个图标超时，尝试第二个
-                img.src = sources[1];
-                timer = setTimeout(() => resolve(false), 3000);
-            }, 3000);
-        });
-    }
-
-    // 更新状态显示
-    function updateStatus(link, isAlive) {
-        const dot = link.querySelector('.status-dot');
-        if (!dot) return;
-        
-        dot.classList.remove('checking', 'online', 'offline');
-        dot.classList.add(isAlive ? 'online' : 'offline');
-    }
-
-    // 全局状态更新
-    function updateAllStatus(status) {
-        allLinks.forEach(link => {
-            const dot = link.querySelector('.status-dot');
-            if (dot) {
-                dot.classList.remove('checking', 'online', 'offline');
-                dot.classList.add(status);
+            this.currentIndex += BATCH_SIZE;
+            if (this.currentIndex < this.total) {
+                setTimeout(() => this.processBatch(), 1500);
             }
-        });
+        }
+
+        async checkLink(link) {
+            const url = new URL(link.href).origin;
+            const cached = this.getCachedStatus(url);
+            
+            if (cached?.status) {
+                this.updateStatus(link, cached.status);
+                if (Date.now() - cached.timestamp < CACHE_TIME) return;
+            }
+
+            for (let i = 0; i <= RETRY_COUNT; i++) {
+                const isAlive = await this.multiCheck(url);
+                if (isAlive !== null) {
+                    this.updateStatus(link, isAlive ? 'online' : 'offline');
+                    this.cacheStatus(url, isAlive);
+                    break;
+                }
+            }
+        }
+
+        async multiCheck(url) {
+            try {
+                return await Promise.race([
+                    this.checkResources(url),
+                    this.checkHeadRequest(url)
+                ]);
+            } catch {
+                return null;
+            }
+        }
+
+        async checkResources(url) {
+            const resources = ['/favicon.ico', '/logo.png', '/robots.txt'];
+            const checks = resources.map(path => {
+                return new Promise(resolve => {
+                    const img = new Image();
+                    img.onload = () => resolve(true);
+                    img.onerror = () => resolve(false);
+                    img.src = `${url}${path}?ts=${Date.now()}`;
+                });
+            });
+            
+            const results = await Promise.all(checks);
+            return results.some(Boolean);
+        }
+
+        async checkHeadRequest(url) {
+            try {
+                const res = await fetch(url, { 
+                    method: 'HEAD', 
+                    mode: 'no-cors',
+                    referrerPolicy: 'no-referrer'
+                });
+                return res.ok || res.type === 'opaque';
+            } catch {
+                return false;
+            }
+        }
+
+        // 状态管理
+        updateStatus(link, status) {
+            const dot = link.querySelector('.status-dot');
+            if (!dot) return;
+            
+            dot.classList.remove('checking', 'online', 'offline');
+            dot.classList.add(status);
+            
+            // 增强可视化反馈
+            link.style.opacity = status === 'online' ? 1 : 0.85;
+            link.style.transition = 'opacity 0.3s ease';
+        }
+
+        // 缓存系统
+        getCachedStatus(url) {
+            const data = localStorage.getItem(`lc_${url}`);
+            return data ? JSON.parse(data) : null;
+        }
+
+        cacheStatus(url, isAlive) {
+            localStorage.setItem(`lc_${url}`, JSON.stringify({
+                status: isAlive,
+                timestamp: Date.now()
+            }));
+        }
+
+        // 网络状态检测
+        isNetworkStable() {
+            const connection = navigator.connection || navigator.mozConnection;
+            const types = ['4g', '5g', 'wifi'];
+            
+            return navigator.onLine && 
+                  (!connection || types.includes(connection.effectiveType));
+        }
+
+        markAllOffline() {
+            this.links.forEach(link => {
+                this.updateStatus(link, 'offline');
+            });
+        }
     }
+
+    // 启动检测
+    const checker = new LinkChecker();
+    checker.start();
 
     // 网络状态监听
-    window.addEventListener('online', startDetection);
-    window.addEventListener('offline', () => updateAllStatus('offline'));
-
-    // 初始化检测
-    startDetection();
+    window.addEventListener('online', () => checker.start());
+    window.addEventListener('offline', () => checker.markAllOffline());
 });
 </script>
 
