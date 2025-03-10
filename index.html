@@ -1073,48 +1073,80 @@ function copyPdfUrl(btn) {
 
 
 	<style>
-/* 状态指示器动画优化 */
+/* 状态指示点完整样式 */
+.link_itess {
+    position: relative !important;
+    padding-top: 6px !important;
+}
+
 .status-dot {
-    /* 原有样式保持不变 */
-	 display: block;
-    width: 5px;
-    height: 5px;
+    display: block;
+    width: 3px;
+    height: 3px;
     border-radius: 50%;
     position: absolute;
-    top: 3px;
-    right: 3px;
-    box-shadow: 0 0 4px rgba(0,0,0,0.1);
-    animation: micro-pulse 1.5s infinite;
-    animation: fade-pulse 2s infinite both;
+    top: 5px;
+    right: 5px;
+    box-shadow: 0 0 3px rgba(0,0,0,0.1);
+    animation: fade-pulse 2.5s infinite ease-in-out;
+    opacity: 0.8;
 }
 
+/* 基础呼吸动画 */
 @keyframes fade-pulse {
-    0% { opacity: 0.6; }
+    0% { opacity: 0.4; }
     50% { opacity: 1; }
-    100% { opacity: 0.6; }
+    100% { opacity: 0.4; }
 }
 
-/* 检测中状态使用更急促的动画 */
+/* 检测中状态 */
 .status-dot.checking {
-    animation: checking-pulse 1.2s infinite ease-in-out;
+    background: #FFD700;
+    animation: checking-pulse 1.5s infinite both;
 }
 
 @keyframes checking-pulse {
-    0% { opacity: 0.4; transform: scale(0.9); }
-    50% { opacity: 1; transform: scale(1.2); }
-    100% { opacity: 0.4; transform: scale(0.9); }
+    0% { 
+        transform: scale(0.8);
+        opacity: 0.3;
+    }
+    50% {
+        transform: scale(1.5);
+        opacity: 0.9;
+    }
+    100% {
+        transform: scale(0.8);
+        opacity: 0.3;
+    }
 }
 
-/* 在线/离线状态使用柔和的渐隐 */
-.status-dot.online,
+/* 在线状态 */
+.status-dot.online {
+    background: #4CAF50;
+    animation: gentle-glow 3s infinite alternate;
+}
+
+/* 离线状态 */
 .status-dot.offline {
-    animation: gentle-fade 3s infinite;
+    background: #9E9E9E;
+    animation: gentle-glow 3s infinite alternate;
 }
 
-@keyframes gentle-fade {
-    0% { opacity: 0.8; }
-    50% { opacity: 0.4; }
-    100% { opacity: 0.8; }
+/* 柔和渐变 */
+@keyframes gentle-glow {
+    0% { opacity: 0.6; }
+    50% { opacity: 0.9; }
+    100% { opacity: 0.6; }
+}
+
+/* 移动端微调 */
+@media (max-width: 768px) {
+    .status-dot {
+        top: 3px;
+        right: 3px;
+        width: 2.5px;
+        height: 2.5px;
+    }
 }
 </style>
 
