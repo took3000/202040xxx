@@ -1064,6 +1064,142 @@ function copyPdfUrl(btn) {
 		
 		
  </script>
- 
+
+
+
+
+
+
+
+
+	    <style>
+/* 新增状态指示器样式 */
+.status-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-left: 8px;
+    position: relative;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.95); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(0.95); }
+}
+
+.status-dot.checking {
+    background: #FFD700; /* 检测中-金色 */
+    animation: pulse 1.5s infinite;
+}
+
+.status-dot.online {
+    background: #4CAF50; /* 在线-绿色 */
+    animation: none;
+}
+
+.status-dot.offline {
+    background: #9E9E9E; /* 离线-灰色 */
+    animation: none;
+}
+</style>
+
+<script>
+// 状态检测优化版 (插入到</body>前)
+document.addEventListener("DOMContentLoaded", function() {
+    const CACHE_EXPIRE = 24 * 60 * 60 * 1000; // 缓存24小时
+    const BATCH_SIZE = 5; // 每批检测数量
+    const BATCH_INTERVAL = 1000; // 批次间隔1秒
+    
+    // 创建状态指示器
+    document.querySelectorAll(".link_itess").forEach(link => {
+        const statusDot = document.createElement("span");
+        statusDot.className = "status-dot checking";
+        link.appendChild(statusDot);
+    });
+
+    // 分批检测函数
+    function batchCheck(links) {
+        let index = 0;
+        
+        function processBatch() {
+            const batch = links.slice(index, index + BATCH_SIZE);
+            batch.forEach(link => checkLinkWithCache(link));
+            index += BATCH_SIZE;
+            
+            if (index < links.length) {
+                setTimeout(processBatch, BATCH_INTERVAL);
+            }
+        }
+        
+        processBatch();
+    }
+
+    // 带缓存的检测
+    async function checkLinkWithCache(link) {
+        const url = new URL(link.href).origin;
+        const cached = localStorage.getItem(url);
+        
+        // 读取缓存
+        if (cached) {
+            const { status, timestamp } = JSON.parse(cached);
+            if (Date.now() - timestamp < CACHE_EXPIRE) {
+                updateStatus(link, status);
+                return;
+            }
+        }
+
+        // 实际检测
+        const isAlive = await checkLinkActual(url);
+        updateStatus(link, isAlive);
+        
+        // 存储缓存
+        localStorage.setItem(url, JSON.stringify({
+            status: isAlive,
+            timestamp: Date.now()
+        }));
+    }
+
+    // 实际检测方法
+    function checkLinkActual(url) {
+        return new Promise(resolve => {
+            if (!navigator.onLine) return resolve(false);
+            
+            const img = new Image();
+            const timer = setTimeout(() => {
+                img.onload = img.onerror = null;
+                resolve(false);
+            }, 5000);
+
+            img.onload = () => {
+                clearTimeout(timer);
+                resolve(url.startsWith('http') || img.width > 0);
+            };
+            
+            img.onerror = () => {
+                clearTimeout(timer);
+                resolve(false);
+            };
+            
+            img.src = `${url}/favicon.ico?ts=${Date.now()}`;
+        });
+    }
+
+    // 更新状态显示
+    function updateStatus(link, isAlive) {
+        const statusDot = link.querySelector('.status-dot');
+        if (!statusDot) return;
+        
+        statusDot.classList.remove('checking');
+        statusDot.classList.add(isAlive ? 'online' : 'offline');
+    }
+
+    // 启动检测
+    const links = Array.from(document.querySelectorAll(".link_itess"));
+    batchCheck(links);
+});
+</script>
     </body>
 </html>
