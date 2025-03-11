@@ -1162,8 +1162,8 @@ function copyPdfUrl(btn) {
 
 	    <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const CACHE_TIME = 0.1 * 60 * 60 * 1000; // 2小时缓存
-    const BATCH_SIZE = 4; 
+    const CACHE_TIME = 1 * 60 * 60 * 1000; // 2小时缓存
+    const BATCH_SIZE = 2; 
     const RETRY_COUNT = 2;
     
     // 初始化状态点（增强版）
@@ -1197,7 +1197,7 @@ document.addEventListener("DOMContentLoaded", function() {
         start() {
             if (!this.isNetworkStable()) {
                 this.markAllOffline();
-                setTimeout(() => this.start(), 5000); // 5秒后重试
+                setTimeout(() => this.start(), 2000); // 5秒后重试
                 return;
             }
             this.processBatch();
