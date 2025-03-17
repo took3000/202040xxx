@@ -1486,18 +1486,22 @@ document.addEventListener("DOMContentLoaded", function() {
 	    </script>
 
 <script>
-	    // 动态加载背景图片
+	  // 改进后的图片预加载逻辑
 document.querySelectorAll('.link_itess').forEach(card => {
-  // 从data属性获取背景图
   const bgImage = card.dataset.bgImage;
-  card.style.setProperty('--bg-image', bgImage);
+  const imgUrl = bgImage.match(/url$$(.*?)$$/)[1];
   
-  // 预加载图片
+  // 创建图片加载监听
   const img = new Image();
-  img.src = bgImage.match(/url$$(.*?)$$/)[1];
   img.onload = () => {
-    card.style.opacity = 1; // 加载完成后显示
+    card.style.opacity = 1;
+    card.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), ${bgImage}`;
   }
+  img.onerror = () => {
+    console.error('背景图加载失败:', imgUrl);
+    card.style.backgroundImage = 'linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url(fallback.jpg)';
+  }
+  img.src = imgUrl;
 });
 </script>
     </body>
