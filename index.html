@@ -171,57 +171,60 @@
             z-index: 1;
         }
 
+/* 卡片容器 */
 .link_itess {
     display: block;
-    position: relative; 
-    text-align: center;
+    position: relative; /* 关键：用于定位伪元素 */
     margin: 2px 2px;
     border: 2px solid #fff;
-    box-shadow: 8px 8px 20px 0 rgba(55, 99, 170, .1);
+    box-shadow: 8px 8px 20px 0 rgba(55, 99, 170, 0.1);
     border-radius: 4px;
-    box-sizing: border-box;
-    flex: 1;
     width: 22%;
     min-width: 76px;
-    height: auto;
     padding: 16px 4px;
-    transition: all .5s ease-out;
-    font-size: 11px;
-    background: #f3f5f8; /* 原渐变备用色 */
+    background: #f3f5f8; /* 备用背景色 */
 }
 
+/* 背景图层 */
 .link_itess::before {
     content: "";
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: url(https://p4.jmpic.xyz/upload_s/202209/20220930015452375.webp);
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: var(--bg-image); /* 读取HTML内联变量 */
     background-size: cover;
     background-position: center;
-    opacity: 0.3;
+    opacity: 0.3; /* 背景透明度 */
     z-index: 1;
     border-radius: 4px;
 }
 
+/* 遮罩层（可选） */
 .link_itess::after {
     content: "";
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255,255,255,0.6);
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255,255,255,0.6); /* 白色半透明遮罩 */
     z-index: 1;
     border-radius: 4px;
 }
 
+/* 文字样式 */
 .link_itessa, .link_itesst {
     position: relative;
-    z-index: 2;
-    /* 可额外添加文字阴影增强对比 */
+    z-index: 2; /* 确保文字在背景上方 */
     text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.link_itessa {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.link_itesst {
+    color: #666;
+    font-size: 12px;
 }
 	    .link_itess:hover::before {
     opacity: 0.5;
