@@ -172,33 +172,7 @@
         }
 
 
-	    /* 在原有.link_itess样式中新增背景图片相关属性 */
-.link_itess {
-    position: relative;
-    overflow: hidden; /* 防止背景溢出 */
-    min-height: 120px; /* 根据内容调整最小高度 */
-    padding: 15px;
-    background: 
-        linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), /* 渐变叠加层 */
-        url('your-image.jpg') center/cover no-repeat; /* 背景图设置 */
-    z-index: 1;
-    transition: transform 0.3s ease; /* 悬停动效 */
-}
-
-/* 文字层提升层级 */
-.link_itessa, .link_itesst {
-    position: relative;
-    z-index: 2; /* 确保文字在背景上层 */
-    color: #fff; /* 根据背景调整文字颜色 */
-}
-
-/* 优化移动端显示 */
-@media (max-width: 768px) {
-    .link_itess {
-        background-size: contain; /* 小屏显示完整图片 */
-    }
-}
-
+	 
 
 	    /* 卡片容器样式 */
 .link_itess {
