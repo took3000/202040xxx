@@ -171,9 +171,61 @@
             z-index: 1;
         }
 
+.link_itess {
+    display: block;
+    position: relative; 
+    text-align: center;
+    margin: 2px 2px;
+    border: 2px solid #fff;
+    box-shadow: 8px 8px 20px 0 rgba(55, 99, 170, .1);
+    border-radius: 4px;
+    box-sizing: border-box;
+    flex: 1;
+    width: 22%;
+    min-width: 76px;
+    height: auto;
+    padding: 16px 4px;
+    transition: all .5s ease-out;
+    font-size: 11px;
+    background: #f3f5f8; /* 原渐变备用色 */
+}
 
-	 
+.link_itess::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url(https://p4.jmpic.xyz/upload_s/202209/20220930015452375.webp);
+    background-size: cover;
+    background-position: center;
+    opacity: 0.3;
+    z-index: 1;
+    border-radius: 4px;
+}
 
+.link_itess::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255,255,255,0.6);
+    z-index: 1;
+    border-radius: 4px;
+}
+
+.link_itessa, .link_itesst {
+    position: relative;
+    z-index: 2;
+    /* 可额外添加文字阴影增强对比 */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+	    .link_itess:hover::before {
+    opacity: 0.5;
+}
     </style>
 	
     
@@ -373,7 +425,7 @@ document.addEventListener("DOMContentLoaded", function() {
      
         <div id="link-liss">
 
-      <a href="https://daniao6.org" target="_blank" class="link_itess" bg-image="url(https://p4.jmpic.xyz/upload_s/202209/20220930015452375.webp)">
+      <a href="https://daniao6.org" target="_blank" class="link_itess" bg-image="url(https://p4.jmpic.xyz/upload_s/202209/20220930015452375.webp)" loading="lazy">
           <div class="link_itessa">大鸟禁漫</div>
           <div class="link_itesst">免费在线阅读最新韩漫</div>    
           </a>
