@@ -87,6 +87,76 @@
     background: #07C160; /* 保持成功状态绿色 */
 }
 
+
+
+* 新增搜索相关样式 */
+        .link_itess {
+            position: relative;  /* 为按钮定位提供参照 */
+            padding-bottom: 40px; /* 给按钮预留空间 */
+        }
+
+        /* 搜索按钮样式 */
+        .card-search-btn {
+            position: absolute;
+            right: 12px;
+            bottom: 12px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #2196F3 url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 0 0 1.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 0 0-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 0 0 5.34-1.48l.27.28v.79l4.26 4.25c.41.41 1.07.41 1.48 0 .41-.41.41-1.07 0-1.48L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>') no-repeat center;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+            z-index: 2; /* 防止被覆盖 */
+        }
+
+        .card-search-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* 搜索弹窗样式 */
+        .search-overlay {
+            position: fixed;
+            bottom: -200px;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            background: rgba(255,255,255,0.96);
+            padding: 20px;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+            transition: bottom 0.3s ease;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        }
+
+        .search-overlay.active {
+            bottom: 0;
+        }
+
+        .search-box {
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            font-size: 16px;
+        }
+
+        .search-submit {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+        }
 	    
     </style>
 	
@@ -270,6 +340,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 
+<!-- 新增搜索弹窗 -->
+        <div class="search-overlay">
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="输入搜索关键词...">
+                <button class="search-submit">开始搜索</button>
+            </div>
+        </div>
 
         
      <br>
@@ -280,9 +357,10 @@ document.addEventListener("DOMContentLoaded", function() {
      
         <div id="link-liss">
 
-      <a href="https://daniao6.org" target="_blank" class="link_itess">
+      <a href="https://daniao6.org" target="_blank" class="link_itess"  data-search-url="https://daniao6.org/search?q=">
           <div class="link_itessa">大鸟禁漫</div>
           <div class="link_itesst">免费在线阅读最新韩漫</div>
+	      <button class="card-search-btn"></button>
           </a>
           
        <a href="https://www.hanmanmianfei.net/category/" target="_blank" class="link_itess">
@@ -1302,6 +1380,43 @@ document.addEventListener("DOMContentLoaded", function() {
     window.addEventListener('offline', () => checker.markAllOffline());
 });
 </script>
-	    
+	    <script>
+
+            // 搜索功能实现
+            let currentSearchBase = '';
+            
+            // 卡片按钮点击事件
+            document.querySelectorAll('.card-search-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const card = this.closest('.link_itess');
+                    currentSearchBase = card.dataset.searchUrl;
+                    document.querySelector('.search-overlay').classList.add('active');
+                    document.querySelector('.search-input').focus();
+                });
+            });
+
+            // 提交搜索
+            document.querySelector('.search-submit').addEventListener('click', performSearch);
+
+            // 回车键支持
+            document.querySelector('.search-input').addEventListener('keypress', (e) => {
+                if(e.key === 'Enter') performSearch();
+            });
+
+            // 关闭弹窗
+            document.querySelector('.search-overlay').addEventListener('click', (e) => {
+                if(e.target === e.currentTarget) {
+                    e.currentTarget.classList.remove('active');
+                }
+            });
+
+            function performSearch() {
+                const keyword = document.querySelector('.search-input').value.trim();
+                if(keyword && currentSearchBase) {
+                    window.location.href = `${currentSearchBase}${encodeURIComponent(keyword)}`;
+                }
+            }
+	    </script>
     </body>
 </html>
