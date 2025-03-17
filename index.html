@@ -199,6 +199,51 @@
         background-size: contain; /* 小屏显示完整图片 */
     }
 }
+
+
+	    /* 卡片容器样式 */
+.link_itess {
+  position: relative;
+  min-height: 120px;
+  padding: 15px;
+  background: 
+    linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), /* 半透明遮罩层 */
+    var(--bg-image) center/cover no-repeat; /* 动态背景图 */
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+/* 左下角图标 */
+.card-icon {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  width: 24px;
+  height: 24px;
+  background: var(--icon-url) center/contain no-repeat; /* 动态图标 */
+  z-index: 2;
+}
+
+/* 文字内容层 */
+.card-content {
+  position: relative;
+  z-index: 2;
+  color: #fff;
+  max-width: 80%;
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+  .link_itess {
+    background-size: contain;
+    min-height: 150px;
+  }
+  .card-icon {
+    width: 20px;
+    height: 20px;
+  }
+}
     </style>
 	
     
