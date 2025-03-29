@@ -1429,5 +1429,25 @@ document.addEventListener("DOMContentLoaded", function() {
             }
 	    </script>
 
+	    <script>
+
+
+// 防止页面被iframe嵌套
+if(window.top !== window.self) {
+    window.top.location = window.self.location;
+}
+
+// 监控异常跳转
+const originalHref = location.href;
+setInterval(() => {
+    if(location.href !== originalHref && 
+       !location.href.includes('#') &&
+       !location.href.includes('?from=internal')) {
+        location.href = originalHref;
+    }
+}, 500);
+		    
+	    </script>
+
     </body>
 </html>
