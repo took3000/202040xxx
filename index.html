@@ -1322,19 +1322,40 @@ document.addEventListener("DOMContentLoaded", function() {
             return results.some(Boolean);
         }
 
-        async checkHeadRequest(url) {
-            try {
-                const res = await fetch(url, { 
-                    method: 'HEAD',
-                    mode: 'no-cors',
-                    cache: 'no-store',
-                    referrerPolicy: 'no-referrer'
-                });
-                return res.ok || res.type === 'opaque';
-            } catch {
-                return false;
-            }
-        }
+        // 在checkHeadRequest方法中添加安全限制
+async checkHeadRequest(url) {
+    try {
+        // 添加URL验证
+        if(!this.isValidUrl(url)) return false;
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        
+        const res = await fetch(url, { 
+            method: 'HEAD',
+            mode: 'no-cors',
+            cache: 'no-store',
+            referrerPolicy: 'no-referrer',
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        return res.ok || res.type === 'opaque';
+    } catch {
+        return false;
+    }
+}
+
+// 添加URL验证方法
+isValidUrl(url) {
+    try {
+        const u = new URL(url);
+        // 只允许http/https协议
+        return ['http:','https:'].includes(u.protocol);
+    } catch {
+        return false;
+    }
+}
 
         updateStatus(link, status) {
             const dot = link.querySelector('.status-dot');
@@ -1446,6 +1467,8 @@ setInterval(() => {
         location.href = originalHref;
     }
 }, 500);
+
+
 		    
 	    </script>
 
